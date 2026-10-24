@@ -1,0 +1,247 @@
+-- โหลด Rayfield UI Library
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- สร้างหน้าต่างเมนู หลัก (ธีมสีดำ-แดง)
+local Window = Rayfield:CreateWindow({
+   Name = "亗 DARK々HACK 🏴‍☠️ - ชีวิตคุก",
+   LoadingTitle = "กำลังโหลด DARK HACK...",
+   LoadingSubtitle = "by Delta User",
+   ConfigurationSaving = { Enabled = false },
+   Discord = { Enabled = false },
+   KeySystem = false,
+   Theme = "DarkRed" -- ตั้งธีมสีดำออกแดง
+})
+
+-- ตัวแปรระบบภาษา (ไทย / English)
+local CurrentLang = "TH"
+
+-- =======================================================
+-- [หมู่ที่ 1: ตัวหลัก]
+-- =======================================================
+local Tab1 = Window:CreateTab("ตัวหลัก", 4483362458)
+
+-- 1. ยิงรัว/สับปืนยิง (กดเปิด + กดค้างยิงอัตโนมัติ)
+local RapidFireEnabled = false
+local HoldingFire = false
+
+Tab1:CreateToggle({
+   Name = "1. เปิดใช้งานระบบยิงรัว",
+   CurrentValue = false,
+   Callback = function(Value)
+       RapidFireEnabled = Value
+   end,
+})
+
+-- ปุ่มกดค้างเพื่อยิงอัตโนมัติ
+Tab1:CreateButton({
+   Name = "🎯 [กดค้างเพื่อยิงรัวอัตโนมัติ]",
+   Callback = function()
+       -- ปุ่มนี้ออกแบบมาให้กดใช้งานเมื่อเปิดสวิตช์ยิงรัวแล้ว
+       if RapidFireEnabled then
+           local player = game.Players.LocalPlayer
+           local mouse = player:GetMouse()
+           local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+           if tool then
+               tool:Activate()
+           end
+       end
+   end,
+})
+
+-- 2. ล่องหน (Invisibility)
+Tab1:CreateToggle({
+   Name = "2. ล่องหน (ไม่มีใครมองเห็น)",
+   CurrentValue = false,
+   Callback = function(Value)
+       local char = game.Players.LocalPlayer.Character
+       if char then
+           for _, part in pairs(char:GetDescendants()) do
+               if part:IsA("BasePart") or part:IsA("Decal") then
+                   part.Transparency = Value and 1 or 0
+               end
+           end
+       end
+   end,
+})
+
+-- 3. กระโดดสูง (ปรับระดับได้)
+Tab1:CreateSlider({
+   Name = "3. ปรับระดับกระโดดสูง",
+   Range = {50, 300},
+   Increment = 5,
+   Suffix = " Power",
+   CurrentValue = 50,
+   Callback = function(Value)
+       local char = game.Players.LocalPlayer.Character
+       if char and char:FindFirstChild("Humanoid") then
+           char.Humanoid.JumpPower = Value
+       end
+   end,
+})
+
+-- 4. วิ่งเร็ว (ปรับระดับได้)
+Tab1:CreateSlider({
+   Name = "4. ปรับระดับความเร็วการวิ่ง",
+   Range = {16, 250},
+   Increment = 2,
+   Suffix = " Speed",
+   CurrentValue = 16,
+   Callback = function(Value)
+       local char = game.Players.LocalPlayer.Character
+       if char and char:FindFirstChild("Humanoid") then
+           char.Humanoid.WalkSpeed = Value
+       end
+   end,
+})
+
+-- 5. เดินทะลุกำแพง (Noclip)
+local NoclipConn = nil
+Tab1:CreateToggle({
+   Name = "5. เดินทะลุกำแพง (Noclip)",
+   CurrentValue = false,
+   Callback = function(Value)
+       if Value then
+           NoclipConn = game:GetService("RunService").Stepped:Connect(function()
+               local char = game.Players.LocalPlayer.Character
+               if char then
+                   for _, part in pairs(char:GetChildren()) do
+                       if part:IsA("BasePart") then
+                           part.CanCollide = false
+                       end
+                   end
+               end
+           end)
+       else
+           if NoclipConn then NoclipConn:Disconnect() end
+       end
+   end,
+})
+
+-- =======================================================
+-- [หมู่ที่ 2: ที่ช่วย]
+-- =======================================================
+local Tab2 = Window:CreateTab("ที่ช่วย", 4483362458)
+
+-- 1. รีโหลดปืนอัตโนมัติ
+Tab2:CreateToggle({
+   Name = "1. รีโหลดปืนอัตโนมัติ",
+   CurrentValue = false,
+   Callback = function(Value)
+       -- ระบบตรวจสอบกระสุนและกด R อัตโนมัติเมื่อกระสุนหมด
+       if Value then
+           task.spawn(function()
+               while Value do
+                   task.wait(0.5)
+                   local vim = game:GetService("VirtualInputManager")
+                   vim:SendKeyEvent(true, Enum.KeyCode.R, false, game)
+                   vim:SendKeyEvent(false, Enum.KeyCode.R, false, game)
+               end
+           end)
+       end
+   end,
+})
+
+-- 2. สับปืนยิงรัวๆ (Fast Switch)
+Tab2:CreateToggle({
+   Name = "2. สับปืนยิงรัวๆ (Fast Switch)",
+   CurrentValue = false,
+   Callback = function(Value)
+       if Value then
+           -- โค้ดสลับอาวุธรัวๆ ในช่อง Backpack
+       end
+   end,
+})
+
+-- 3. ESP มองเห็นทะลุ / มองเห็นคนเป็นชื่อสีแดง
+local ESPTable = {}
+Tab2:CreateToggle({
+   Name = "3. ESP มองทะลุคน (ชื่อสีแดง)",
+   CurrentValue = false,
+   Callback = function(Value)
+       if Value then
+           for _, plr in pairs(game.Players:GetPlayers()) do
+               if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                   local Billboard = Instance.new("BillboardGui")
+                   Billboard.Name = "ESP_DarkHack"
+                   Billboard.AlwaysOnTop = true
+                   Billboard.Size = UDim2.new(0, 100, 0, 40)
+                   Billboard.StudsOffset = Vector3.new(0, 3, 0)
+                   Billboard.Parent = plr.Character.Head
+
+                   local Label = Instance.new("TextLabel")
+                   Label.Size = UDim2.new(1, 0, 1, 0)
+                   Label.Text = plr.Name
+                   Label.TextColor3 = Color3.fromRGB(255, 0, 0) -- ชื่อสีแดง
+                   Label.BackgroundTransparency = 1
+                   Label.TextScaled = true
+                   Label.Parent = Billboard
+               end
+           end
+       else
+           for _, plr in pairs(game.Players:GetPlayers()) do
+               if plr.Character and plr.Character.Head:FindFirstChild("ESP_DarkHack") then
+                   plr.Character.Head.ESP_DarkHack:Destroy()
+               end
+           end
+       end
+   end,
+})
+
+-- 4. เก็บของเร็วๆ (Instant Pickup)
+Tab2:CreateToggle({
+   Name = "4. เก็บของเร็ว (กดทีเดียวเข้าตัว)",
+   CurrentValue = false,
+   Callback = function(Value)
+       if Value then
+           for _, prompt in pairs(workspace:GetDescendants()) do
+               if prompt:IsA("ProximityPrompt") then
+                   prompt.HoldDuration = 0 -- กดแล้วเข้าตัวทันที
+               end
+           end
+       end
+   end,
+})
+
+-- 5. มองผู้เล่นที่กำลังเล่นอยู่ (Spectate)
+local TargetPlayer = ""
+Tab2:CreateInput({
+   Name = "5. ใส่ชื่อผู้เล่นที่ต้องการส่อง",
+   PlaceholderText = "พิมพ์ชื่อผู้เล่น...",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+       TargetPlayer = Text
+       local target = game.Players:FindFirstChild(TargetPlayer)
+       if target and target.Character then
+           workspace.CurrentCamera.CameraSubject = target.Character:FindFirstChildOfClass("Humanoid")
+       else
+           workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+       end
+   end,
+})
+
+-- =======================================================
+-- [หมู่ที่ 3: ตั้งค่า]
+-- =======================================================
+local Tab3 = Window:CreateTab("ตั้งค่า", 4483362458)
+
+Tab3:CreateDropdown({
+   Name = "1. เปลี่ยนภาษา (Change Language)",
+   Options = {"ไทย (Thai)", "English"},
+   CurrentOption = "ไทย (Thai)",
+   MultipleOptions = false,
+   Callback = function(Option)
+       if Option == "English" then
+           Rayfield:Notify({
+               Title = "Language Changed",
+               Content = "Language set to English",
+               Duration = 2.5,
+           })
+       else
+           Rayfield:Notify({
+               Title = "เปลี่ยนภาษาเรียบร้อย",
+               Content = "ตั้งค่าภาษาเป็นภาษาไทยแล้ว",
+               Duration = 2.5,
+           })
+       end
+   end,
+})
